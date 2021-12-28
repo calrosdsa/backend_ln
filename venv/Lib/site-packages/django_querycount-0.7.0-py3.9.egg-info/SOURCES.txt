@@ -1,0 +1,10 @@
+README.rst
+setup.cfg
+setup.py
+django_querycount.egg-info/PKG-INFO
+django_querycount.egg-info/SOURCES.txt
+django_querycount.egg-info/dependency_links.txt
+django_querycount.egg-info/top_level.txt
+querycount/__init__.py
+querycount/middleware.py
+querycount/qc_settings.py

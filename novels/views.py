@@ -273,7 +273,7 @@ class CreateReview(APIView):
         serializer1 = NovelSerializer3(novel).data
         reviews = Review.objects.annotate(user = Cast('profile__name',output_field=CharField()),
         avatar = Concat(Value('/media/'),'profile__avatar',output_field=CharField()),
-        like=Count('likes',distinct=True)).filter(novel = novel)
+        like=Count('likes',distinct=True)).filter(novel = novel).order_by('-date_added')
         serializer = ReviewSerialiezer(reviews, many =True).data
         serializer1['reviews']= serializer
         return Response(serializer1)

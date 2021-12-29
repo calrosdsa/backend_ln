@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-v3fx)3!ke@52hd!h$pxo9n)qbnns4co_dkuhi7w+vmwh)n(bq%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -91,7 +91,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
-ASGI_APPLICATION = 'core.asgi.application'
+#ASGI_APPLICATION = 'core.asgi.application'
 
 
 # Database
@@ -132,10 +132,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 
-INTERNAL_IPS = (
-    "127.0.0.1", "192.168.33.11", "191.168.56.1", "192.168.33.1"
-)
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -156,7 +152,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # when we upload images we tell django where to upload the images to
 
@@ -209,14 +205,14 @@ REST_FRAMEWORK = {'DATETIME_FORMAT': "%m/%d/%Y %H:%M:%S",
 
 # mysite/settings.py
 # Channels
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
-    },
-}
+#CHANNEL_LAYERS = {
+    #'default': {
+     #   'BACKEND': 'channels_redis.core.RedisChannelLayer',
+    #    'CONFIG': {
+   #         "hosts": [('127.0.0.1', 6379)],
+  #      },
+ #   },
+#}
 # Specifies localhost port 3000 where the React
 # server will be running is safe to receive requests
 # from. All all of this.

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-v3fx)3!ke@52hd!h$pxo9n)qbnns4co_dkuhi7w+vmwh)n(bq%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://light-novels.herokuapp.com']
 
 
 # Application definition
@@ -245,3 +245,4 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'    
+django_heroku.settings(locals())

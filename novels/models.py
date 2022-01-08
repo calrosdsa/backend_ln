@@ -11,8 +11,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.template.defaultfilters import default, slugify, title
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
+#from asgiref.sync import async_to_sync
+#from channels.layers import get_channel_layer
 import json
 User = get_user_model()
 
@@ -99,16 +99,16 @@ class Novel(models.Model):
         return chapter ,review
     
 
-    def save(self,*args, **kwargs):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-           "notification_broadcast",
-            {
-            'type': 'send_notification',
-            'message': json.dumps(f'Realised or update {self.novel}')
-            }
-         )
-        super().save(*args, **kwargs)
+ #   def save(self,*args, **kwargs):
+  #      channel_layer = get_channel_layer()
+   #     async_to_sync(channel_layer.group_send)(
+    #       "notification_broadcast",
+     #       {
+      #      'type': 'send_notification',
+       #     'message': json.dumps(f'Realised or update {self.novel}')
+        #    }
+         #)
+        #super().save(*args, **kwargs)
 
     def save(self, slug="", *args, **kwargs):
         if not self.id:
@@ -214,18 +214,18 @@ class NovelChapter(models.Model):
         return ('view_tag', None, {'slug': self.slug })
     
 
-    def save(self,*args, **kwargs):
+    #def save(self,*args, **kwargs):
    
-        print(self.title)
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-           "notification_broadcast",
-            {
-            'type': 'send_notification',
-            'message': json.dumps(f'Realised or update chapter {self.title}')
-            }
-         )
-        super().save(*args, **kwargs)
+        #print(self.title)
+ #       channel_layer = get_channel_layer()
+  #      async_to_sync(channel_layer.group_send)(
+   #        "notification_broadcast",
+    #        {
+     #       'type': 'send_notification',
+      #      'message': json.dumps(f'Realised or update chapter {self.title}')
+       #     }
+        # )
+       # super().save(*args, **kwargs)
     
  
 
@@ -259,16 +259,7 @@ class Library(models.Model):
     @property
     def products_count(self):
         return self.products.all().count()
-    def send(self):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-           "notification_broadcast",
-            {
-            'type': 'send_notification',
-            'message': json.dumps(f'Realised or update chapter {self.novel}')
-            }
-         )
-        return print('sended')
+   
 
     # Each user should be have favorite products
 # When user registered create favorite products model with this user

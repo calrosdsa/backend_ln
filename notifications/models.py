@@ -4,10 +4,10 @@ from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from novels.models import Novel
 from django.db.models.signals import m2m_changed, post_save
-from channels.layers import get_channel_layer
+#from channels.layers import get_channel_layer
 import json
 from utils.models import Extensions,TimeStampedModel
-from asgiref.sync import async_to_sync
+#from asgiref.sync import async_to_sync
 
 User = get_user_model()
 
@@ -22,16 +22,16 @@ class NovelNotifiactions(TimeStampedModel):
       
     class Meta:
         verbose_name_plural = 'Notifications'
-    def save(self,*args, **kwargs):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-           "notification_broadcast",
-            {
-            'type': 'send_notification',
-            'message': json.dumps(f'Realised or update {self.novel}')
-            }
-         )
-        super().save(*args, **kwargs)
+ #   def save(self,*args, **kwargs):
+  #      channel_layer = get_channel_layer()
+   #     async_to_sync(channel_layer.group_send)(
+    #       "notification_broadcast",
+     #       {
+      #      'type': 'send_notification',
+       #     'message': json.dumps(f'Realised or update {self.novel}')
+        #    }
+         #)
+        #super().save(*args, **kwargs)
     @property
     def cover(self):
         return self.novel.cover

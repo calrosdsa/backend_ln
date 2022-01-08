@@ -1,6 +1,6 @@
 from django.db.models.aggregates import Max, Min
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
+#from asgiref.sync import async_to_sync
+#from channels.layers import get_channel_layer
 from django.contrib.postgres.aggregates import ArrayAgg
 from profiles.models import History, HistoryNovel
 from .filter import AdvaceFilter, LibraryFilter, NovelFilter
@@ -34,7 +34,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 Users = apps.get_model('users', 'CustomUser')
 Profile = apps.get_model('profiles', 'Profile')
-channel_layer = get_channel_layer()
+#channel_layer = get_channel_layer()
 # Create your views here.
 
 
@@ -236,13 +236,13 @@ class UpdateFavoritesProductsView(APIView):
         else:
             obj.products.add(product)
             product.book_marked.add(user)
-            async_to_sync(channel_layer.group_send)(
-               "notification_broadcast",
-               {
-               'type': 'send_notification',
-               'message': json.dumps(f'Realised or update chapter {product.title}')
-            }
-         )
+      #      async_to_sync(channel_layer.group_send)(
+       #        "notification_broadcast",
+        #       {
+         #      'type': 'send_notification',
+          #     'message': json.dumps(f'Realised or update chapter {product.title}')
+           # }
+         #)
         return Response('added') 
     def put(self,request,novel_id):
         user = request.user

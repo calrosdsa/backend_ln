@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',    
     'django.contrib.staticfiles',
     'django_filters',
-    'channels',
+   # 'channels',
     'rest_framework', # new
     'rest_framework.authtoken', # new
     'django.contrib.sites', # new
@@ -93,7 +93,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
-ASGI_APPLICATION = 'core.asgi.application'
+#ASGI_APPLICATION = 'core.asgi.application'
 
 
 # Database
@@ -211,14 +211,14 @@ REST_FRAMEWORK = {'DATETIME_FORMAT': "%m/%d/%Y %H:%M:%S",
 
 # mysite/settings.py
 # Channels
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6380)],
-        },
-    },
-}
+#CHANNEL_LAYERS = {
+ #   'default': {
+  #      'BACKEND': 'channels_redis.core.RedisChannelLayer',
+   #     'CONFIG': {
+    #        "hosts": [('127.0.0.1', 6380)],
+     #   },
+    #},
+#}
 
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"

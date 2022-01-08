@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',    
     'django.contrib.staticfiles',
     'django_filters',
     'channels',
@@ -49,7 +50,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount', # new
     'rest_auth.registration', # new
     'corsheaders', # new
-    'whitenoise.runserver_nostatic',    
     #'debug_toolbar',
     'users',
     'profiles',
@@ -156,7 +156,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )

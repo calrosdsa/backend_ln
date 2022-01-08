@@ -14,6 +14,25 @@ STATUS_CHOICES = (
     (1, 'Manager'),
     (2, 'Admin'),
 )
+
+
+class LibraryFilter(django_filters.FilterSet):
+    options = django_filters.NumberFilter(field_name='options',lookup_expr='icontains')
+    ordering = django_filters.OrderingFilter(fields=(
+            ('created'),
+            ('updated'),
+            ('added'),          
+        ),
+
+        # labels do not need to retain order
+        field_labels={
+            'ordering': 'Novels',
+        }) 
+    class Meta:
+        model = Novel
+        fields = ['ordering','options',]
+        
+        
 class TagFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(field_name='title',lookup_expr='startswith')
      
@@ -69,7 +88,7 @@ class AdvaceFilter(django_filters.FilterSet):
     
     ordering = django_filters.OrderingFilter(fields=(
             ('created'),
-            ('update_at'),
+            ('updated'),
             ('popular'),
             ('rank'),
             ('book_marked'),
@@ -94,7 +113,7 @@ class NovelFilter(django_filters.FilterSet):
     status = django_filters.ModelChoiceFilter(queryset = Status.objects.all())
     ordering = django_filters.OrderingFilter(fields=(
             ('created'),
-            ('update_at'),
+            ('updated'),
             ('popular'),
         ),
 

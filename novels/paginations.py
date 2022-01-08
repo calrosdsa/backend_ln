@@ -11,6 +11,18 @@ from django.db.models import Max,Sum,Avg,Count
 from tags.models import Tag
 from django.db.models.functions import Coalesce,Cast,Concat,ExtractMonth
 
+class LibraryPagination(pagination.PageNumberPagination):
+    page_size=20
+    def get_paginated_response(self, data):
+
+        return Response({
+            'results': data,
+            'options': self.request.GET.get('options'),
+            'ordering': self.request.GET.get('ordering'),
+
+        })
+
+
 
 class DefaultPagination(pagination.PageNumberPagination):
     page_size=20
@@ -70,7 +82,7 @@ class CustomPagination(pagination.PageNumberPagination):
         previous_page_query = (self.get_previous_link().split('/')[-1]
                                if self.get_previous_link() else None)
         novel = get_object_or_404(Novel.objects.annotate(statuss = Cast('status__status', output_field=CharField()),
-            chapters = Count('novel_chapter__id')), id = data[0].get('novel'))
+            chapters = Count('novel_chapter__id'),updated=Max('novel_chapter__created_at')), id = data[0].get('novel'))
         novel = NovelSerializer4(novel)
 
         return Response({

@@ -16,6 +16,12 @@ from novels.models import NovelChapter
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from novels.models import Novel
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 class TagView(ListAPIView):
     queryset = Tag.objects.alias(popular_tags = Count('novels')).order_by('-popular_tags')
@@ -33,6 +39,12 @@ class NovelChapterUpdate(ListAPIView):
             novel_slug = Cast('novel__slug',output_field=SlugField())).reverse()
     serializer_class =NovelChapterSerializer2
     pagination_class = DefaultPagination
+
+    
+    @method_decorator(vary_on_cookie)
+    @method_decorator(cache_page(CACHE_TTL))
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 

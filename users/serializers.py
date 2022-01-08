@@ -10,7 +10,7 @@ class UserSerializer(ModelSerializer):
 
 class CustomTokenSerializer(TokenSerializer):
     user = UserSerializer(read_only=True)
-
+    
     class Meta(TokenSerializer.Meta):
         fields = ('key', 'user')
 

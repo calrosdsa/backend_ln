@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount', # new
     'rest_auth.registration', # new
     'corsheaders', # new
+    'whitenoise.runserver_nostatic',    
     #'debug_toolbar',
     'users',
     'profiles',
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', # IMPORTANT !this will recognize the frontend and NOT deny the access
     'querycount.middleware.QueryCountMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -91,7 +93,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
-#ASGI_APPLICATION = 'core.asgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
 
 
 # Database
@@ -146,6 +148,8 @@ USE_L10N = True
 USE_TZ = True
 
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -163,7 +167,6 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 ## ALL CUSTOM SETTINGS BELOW ##
 
@@ -205,14 +208,31 @@ REST_FRAMEWORK = {'DATETIME_FORMAT': "%m/%d/%Y %H:%M:%S",
 
 # mysite/settings.py
 # Channels
-#CHANNEL_LAYERS = {
-    #'default': {
-     #   'BACKEND': 'channels_redis.core.RedisChannelLayer',
-    #    'CONFIG': {
-   #         "hosts": [('127.0.0.1', 6379)],
-  #      },
- #   },
-#}
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6380)],
+        },
+    },
+}
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+CACHE_TTL = 60 *  60 * 1
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6380", # Local Link provided by the redis-server command
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "example"
+    }
+}
 # Specifies localhost port 3000 where the React
 # server will be running is safe to receive requests
 # from. All all of this.
@@ -222,5 +242,3 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'    
-
-django_heroku.settings(locals())

@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import F
+from django.contrib.postgres.fields import ArrayField
 import datetime
 import uuid
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -8,7 +10,7 @@ from profiles.models import Profile
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
-from django.template.defaultfilters import slugify, title
+from django.template.defaultfilters import default, slugify, title
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import json
@@ -113,8 +115,8 @@ class Novel(models.Model):
             self.slug = slugify(self.title)
         return super(Novel, self).save(*args, **kwargs) 
     @classmethod
-    def update_avg(cls, novel_id, avg,views):
-        Novel.objects.filter(id = novel_id).update(average=avg,novel_views= views+1)
+    def update_avg(cls, novel_id, avg):
+        Novel.objects.filter(id = novel_id).update(average=avg,novel_views=F('novel_views') +1 )
 
 class Review(models.Model):
     novel = models.ForeignKey(Novel, on_delete=models.CASCADE, related_name='review')
@@ -190,11 +192,13 @@ class Reply_Review(models.Model):
         
 class NovelChapter(models.Model):
     novel=models.ForeignKey(Novel,on_delete=models.CASCADE,null=True,related_name="novel_chapter")
+    number= models.SmallIntegerField(null=True,blank=True)
     title=models.CharField(null=True, max_length=255)
     slug = models.SlugField(max_length=100, null=True)
     chapter=models.TextField(null=True)
+    user_seens = models.ManyToManyField(User,blank=True,related_name='user_seen_chapters',default=User)
     created_at=models.DateTimeField(auto_now_add=True,editable=False)
-    updated_at=models.DateTimeField(auto_now=True)
+    updated_at=models.DateTimeField(auto_now_add=True)
     class Meta:
         ordering=("created_at",)
         
@@ -208,8 +212,11 @@ class NovelChapter(models.Model):
         
     def get_absolute_url(self):
         return ('view_tag', None, {'slug': self.slug })
+    
 
     def save(self,*args, **kwargs):
+   
+        print(self.title)
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
            "notification_broadcast",
@@ -219,36 +226,66 @@ class NovelChapter(models.Model):
             }
          )
         super().save(*args, **kwargs)
-
+    
+ 
 
             
 class LibraryManager(models.Manager):
     def check_product(self, user, product_id):
         if user.is_authenticated:
-            return user.favorite_products.products.filter(id=product_id).exists()
+            return user.favorites_novels.products.filter(id=product_id).exists()
 
 
+ 
 
+    
+
+#add timestamp 
 class Library(models.Model):
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,null=True, related_name='favorite_products')
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,null=True, related_name='favorites_novels')
     products = models.ManyToManyField(
-        Novel, related_name='products', blank=True)
-
+        Novel, related_name='novels', blank=True,through='LibraryModel')
     objects = LibraryManager()
 
-    class Meta:
+    class Meta: 
         verbose_name_plural = 'Favorites Librarys'
 
     def __str__(self):
         return self.user.username
 
+    
+
     @property
     def products_count(self):
         return self.products.all().count()
+    def send(self):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+           "notification_broadcast",
+            {
+            'type': 'send_notification',
+            'message': json.dumps(f'Realised or update chapter {self.novel}')
+            }
+         )
+        return print('sended')
 
     # Each user should be have favorite products
 # When user registered create favorite products model with this user
+
+def defaulut_option():
+    return list([0])
+
+class LibraryModel(models.Model):
+    novel = models.ForeignKey(Novel,on_delete=models.CASCADE,related_name='library_novel')
+    library = models.ForeignKey(Library,on_delete=models.CASCADE)
+    option = ArrayField(models.IntegerField(null=True,blank=True,validators=[
+            MaxValueValidator(3),
+            MinValueValidator(0)
+        ]),default=defaulut_option)
+    date_added = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.novel.title
 
 
 @receiver(post_save, sender=User)
@@ -257,7 +294,4 @@ def create_fvorite_products(sender, instance, created, **kwargs):
         Library.objects.create(user=instance)
 
 
-@receiver(post_save, sender=User)
-def save_fvorite_products(sender, instance, **kwargs):
-    instance.favorite_products.save()   
-    
+

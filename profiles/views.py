@@ -1,5 +1,7 @@
+from django.db.models.aggregates import Max
 from django.db.models.expressions import Value
-from django.db.models.fields import CharField, SlugField
+from django.db.models.fields import CharField, IntegerField, SlugField
+from django.db.models.query_utils import Q
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views import generic
@@ -9,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated #for authenticated routes
 from django.views.decorators.csrf import csrf_exempt #for authenticated routes
 # API dependencies
 from .serializers import CommentSerializerUser, ProfileSerializer,HistorySerializer, ReviewSerialiezerUser
-from .models import History, Profile
+from .models import  HistoryNovel, Profile
 from rest_framework import pagination, serializers, status
 import json #Useful for POST and PUT requests
 from django.core.exceptions import ObjectDoesNotExist
@@ -29,9 +31,9 @@ class ReviewUserView(APIView):
     permission_classes = [IsAuthenticated, ]
     def get(self,request):
         user = request.user
-        review = Review.objects.filter(added_by=user).annotate(like =Count('likes',distinct=True),avatar = Concat(Value('/media/'),'profile__avatar',output_field=CharField()),
+        review = Review.objects.filter(added_by=user).annotate(like =Count('likes',distinct=True),
             user = Cast('added_by__username',output_field=CharField()),novel_title = Cast('novel__title',output_field=CharField()),
-            novel_cover=Concat(Value('/media/'),'novel__cover',output_field=CharField()),novel_slug= Cast('novel__slug',output_field=SlugField()))
+           novel_slug= Cast('novel__slug',output_field=SlugField()))
         serializer = ReviewSerialiezerUser(review,many=True).data
         return Response({'reviews':serializer})
 
@@ -40,9 +42,8 @@ class CommentUserView(APIView):
     def get(self, request):
         user =request.user
         comment = Comment.objects.filter(added_by = user).annotate(count_likes = Count('likes'),added_b = Cast('added_by__username',output_field=CharField()),
-            image = Concat(Value('/media/'),'profile__avatar',output_field=CharField()),
             count_reply = Count('reply_comments',distinct=True),novel_title = Cast('novel__title',output_field=CharField()),
-            novel_cover = Concat(Value('/media/'),'novel__cover',output_field=CharField()),novel_slug=Cast('novel__slug',output_field=SlugField()))
+            novel_slug=Cast('novel__slug',output_field=SlugField()))
         serializer = CommentSerializerUser(comment, many=True).data
         return Response({'comments':serializer})
     
@@ -51,16 +52,18 @@ class CommentUserView(APIView):
 # // @route GET profile/members
 # // @desc Get all profiles using
 # // @access Public (No Authentication)
-class HistoryView(ListAPIView):
-    serializer_class = HistorySerializer
-    queryset=History.objects.all()
-    pagination_class = None
-    def list(self, request, *args, **kwargs):
-        user=request.user
-        queryset = self.get_queryset()
-        history = queryset.filter(user=user)
-        serializer = HistorySerializer(history,many=True)
-        return Response(serializer.data)
+class HistoryView(APIView):
+    def get(self,request):
+        user = request.user
+        history = HistoryNovel.objects.filter(user=user).annotate(novel_title = Cast('novel__title',output_field=CharField()),
+        novel_slug = Cast('novel__slug',output_field=CharField()),
+        chapters = Count('novel__novel_chapter__id',distinct=True),progress = Max('novel__novel_chapter__number',filter=Q(novel__novel_chapter__user_seens=user)),
+        last_chapter = Max('novel__novel_chapter__title',filter=Q(novel__novel_chapter__user_seens=user.id)),
+        last_chapter_slug=Max('novel__novel_chapter__slug',filter=Q(novel__novel_chapter__user_seens=user.id)),rank=Cast('novel__rank',output_field=IntegerField()),
+        novel_cover = Concat(Value('/media/'), 'novel__cover',output_field=CharField()))
+        serializer  = HistorySerializer(history,many=True).data
+        return Response(serializer)
+    
     #def get_queryset(self):
     #    queryset = super(History,self).get_queryset()
      #   user = self.kwargs.get('user')

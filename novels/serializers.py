@@ -3,7 +3,7 @@ from django.db.models.fields.files import ImageField
 from rest_framework import serializers
 from rest_framework.fields import CharField, FloatField, IntegerField
 from rest_framework.response import Response
-from .models import  Library, Novel,NovelChapter,Reply_Comment,Reply_Review,Comment,Review
+from .models import  Library, LibraryModel, Novel,NovelChapter,Reply_Comment,Reply_Review,Comment,Review
 from tags.models import Tag
 from categories.models import Category
 from django.contrib.auth import get_user_model
@@ -32,13 +32,13 @@ class TagSlugSerializer(serializers.ModelSerializer):
 
 
 class Comment_ReplySerializer(serializers.ModelSerializer):
-    avatar= serializers.CharField(read_only=True)
+    image= serializers.CharField(read_only=True)
     added_b = serializers.CharField(read_only=True)
     like = serializers.IntegerField()
     
     class Meta:
         model=Reply_Comment
-        fields=[ 'id', 'avatar', 'added_b','like', 'reply', 'date_added']
+        fields=[ 'id', 'image', 'added_b','like', 'reply', 'date_added']
 
 
 
@@ -59,7 +59,7 @@ class CommentSerializer(serializers.ModelSerializer):
    # reply_comments = Comment_ReplySerializer(read_only = True, many=True)
     class Meta:
         model=Comment
-        fields = ['id','count_reply', 'image','count_likes','added_b' ,'body', 'date_added']
+        fields = ['id','count_reply','added_by', 'image','count_likes','added_b' ,'body', 'date_added']
         read_only_fields = fields
         
 
@@ -77,7 +77,7 @@ class ReviewSerialiezer(serializers.ModelSerializer):
 class NovelChapterSerializer(serializers.ModelSerializer):
     class Meta:
         model=NovelChapter
-        fields= ['created_at','novel', 'id','title','slug']
+        fields= ['created_at','novel', 'id','title','slug','number']
         read_only_fields = fields
 
 
@@ -94,9 +94,10 @@ class NovelChapterSerializer2(serializers.ModelSerializer):
 class NovelChapterSerializer3(serializers.ModelSerializer):
     novel_title = serializers.CharField()
     novel_cover = serializers.CharField()
+    novel_slug = serializers.CharField()
     class Meta:
         model=NovelChapter
-        fields= ('id','novel_title','chapter','novel_cover','novel','created_at','title')
+        fields= ('id','novel_title','chapter','novel_cover','novel','created_at','title','novel_slug')
         read_only_fields = fields
           
     
@@ -146,9 +147,10 @@ class NovelSerializer3(serializers.ModelSerializer):
 class NovelSerializer4(serializers.ModelSerializer):
     statuss = serializers.CharField()
     chapters = serializers.IntegerField()
+    updated = serializers.DateTimeField()
     class Meta:
         model=Novel
-        fields= ['cover','statuss','id','rank','slug' ,'title','update_at','chapters']
+        fields= ['cover','statuss','id','rank','slug' ,'title','updated','chapters']
         read_only_fields = fields
         
         
@@ -158,9 +160,11 @@ class NovelSerializer0(serializers.ModelSerializer):
     reviews = serializers.IntegerField()
     chapters = serializers.IntegerField()
     status_name = serializers.CharField()
+    updated = serializers.DateTimeField()
     class Meta:
         model=Novel
-        fields= ['cover','slug','id', 'title','created','update_at','comentarios','reviews','chapters','status_name','average','rank']
+        fields= ['cover','slug','id', 'title','created','updated','comentarios','reviews','chapters',
+                'status_name','average','rank']
         read_only_fields = fields
         
 class NovelSerializer2(serializers.ModelSerializer):
@@ -183,10 +187,12 @@ class NovelSerializer(serializers.ModelSerializer):
     chapters = serializers.IntegerField()
     authors = serializers.CharField()
     statuss = serializers.CharField()
+    updated = serializers.DateTimeField()
+    
 
     class Meta:
         model=Novel
-        fields= ['cover','slug','novel_views','tags','created','update_at','category','authors','statuss','sub','description',
+        fields= ['cover','slug','novel_views','tags','created','updated','category','authors','statuss','sub','description',
          'id','sumary','rank', 'title','average','average','book_marked','reviews','chapters' ]
 
         read_only_fields = fields
@@ -195,11 +201,23 @@ class NovelSerializer(serializers.ModelSerializer):
         if user.is_authenticated:
             return Library.objects.check_product(user, obj.id)
         return False
+class OptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=LibraryModel
+        fields=['option']
+
 class NovelSerializerFav(serializers.ModelSerializer):
-    average = serializers.FloatField()
+    progress = serializers.IntegerField()
+    chapters = serializers.IntegerField()
+    added = serializers.CharField()
+    options = serializers.ListField(
+        child=serializers.IntegerField()
+        )
+    updated = serializers.DateTimeField()
     class Meta:
         model=Novel
-        fields= ['cover','id','average','rank','slug' ,'title','update_at']
+        fields= ['cover','id','progress','slug','options' ,'title','chapters','added','updated']
+        
         read_only_fields = fields 
 
 class LibrarySerializer(serializers.ModelSerializer):
@@ -207,3 +225,8 @@ class LibrarySerializer(serializers.ModelSerializer):
     class Meta:
         model=Library   
         fields= ['novel']
+class NovelChapterUser(serializers.ModelSerializer):
+    
+    class Meta:
+        model = NovelChapter
+        fields = ['slug','title']

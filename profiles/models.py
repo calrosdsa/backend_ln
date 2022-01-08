@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import tree # you can use this for models instead of CustomUser
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.models import ContentType      
 from django.contrib.contenttypes.fields import GenericForeignKey
 from .signals import object_viewed_signal
 # Create your models here.
@@ -14,6 +14,13 @@ class Profile(models.Model):
     def __str__(self):
         return str(self.user)
 
+
+class HistoryNovel(models.Model):
+    user            = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    novel  = models.ForeignKey('novels.Novel',on_delete=models.CASCADE) # is the actual object
+    viewed_on       = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.novel.title
 
 class History(models.Model):
     user            = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

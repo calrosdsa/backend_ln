@@ -3,7 +3,7 @@ from django.conf.urls import url
 from . import views
 from .views import PostList
 urlpatterns = [
-  path('library', views.FavoritesProductsView.as_view(), name='library'),
+  path('library/', views.FavoritesProductsView.as_view(), name='library'),
   path('favorites-products/update/<int:id>/',views.UpdateFavoritesProductsView.as_view(), name="update-favorites-products"),
   path('tag/<slug:tag>/', PostList.as_view()),
   path('author/<slug:author>/', PostList.as_view()),
@@ -17,10 +17,12 @@ urlpatterns = [
   path('putreview/<int:review_id>/', views.CreateReview.as_view()),
   path('postcomment/<id>/', views.CreateComment.as_view()),
   path('comment/<id>/', views.CommentView.as_view()),
-  path('allnovels/', views.SearchNovel.as_view()),
-  path('advancedfilter/',views.AdvancedFilter.as_view())
+  path('search/', views.SearchNovel.as_view()),
+  path('advancedfilter/',views.AdvancedFilter.as_view()),
+  path('last/<id>/',views.NovelLastView.as_view()),
+  path('updated/<id>/',views.UpdatedComment.as_view()),
+  path('option/<novel_id>/',views.UpdateFavoritesProductsView.as_view()),
 
 
-
-
+  
 ]
